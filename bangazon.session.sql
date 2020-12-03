@@ -30,7 +30,7 @@
 
 SELECT
     *
-FROM bangazonapi_productrating
+FROM bangazonapi_product
 
 -- try to get ratings
-if no ratings, return
+-- if no ratings, return
