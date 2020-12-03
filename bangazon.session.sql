@@ -29,8 +29,44 @@
 
 
 SELECT
-    *
-FROM bangazonapi_product
+    op.order_id,
+    p.name,
+    p.id prod_id,
+    o.payment_type_id,
+    op.order_id
+FROM bangazonapi_order o
+JOIN bangazonapi_orderproduct op ON op.product_id = p.id
+JOIN bangazonapi_product p ON p.id = op.product_id
 
+SELECT
+    o.id order_id,
+    o.payment_type_id paymentType,
+    op.id opId,
+    op.order_id opOrderId,
+    op.product_id opProdId
+FROM bangazonapi_orderproduct op
+LEFT JOIN bangazonapi_order o ON op.order_id = o.id
+
+SELECT
+    *
+FROM bangazonapi_orderproduct
+
+SELECT
+    p.id prodId,
+    p.name,
+    op.id opId,
+    op.product_id opProdId
+FROM bangazonapi_product p
+JOIN bangazonapi_orderproduct op ON opProdId = prodId
 -- try to get ratings
 -- if no ratings, return
+
+-- get all the product line items
+
+SELECT
+o.id orderId,
+o.payment_type_id paymentId,
+op.product_id,
+op.order_id
+FROM bangazonapi_order o
+LEFT JOIN bangazonapi_orderproduct op ON op.order_id = o.id
