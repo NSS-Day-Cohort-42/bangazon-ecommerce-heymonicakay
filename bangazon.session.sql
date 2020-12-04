@@ -39,17 +39,21 @@ JOIN bangazonapi_orderproduct op ON op.product_id = p.id
 JOIN bangazonapi_product p ON p.id = op.product_id
 
 SELECT
-    o.id order_id,
-    o.payment_type_id paymentType,
-    op.id opId,
-    op.order_id opOrderId,
-    op.product_id opProdId
-FROM bangazonapi_orderproduct op
-LEFT JOIN bangazonapi_order o ON op.order_id = o.id
+    *
+FROM bangazonapi_orderproduct
 
 SELECT
     *
-FROM bangazonapi_orderproduct
+FROM bangazonapi_order
+
+SELECT
+    COUNT(op.id),
+    p.name
+FROM bangazonapi_orderproduct op
+JOIN bangazonapi_product p ON p.id = op.product_id
+JOIN bangazonapi_order o ON o.id = op.order_id
+GROUP BY o.id
+
 
 SELECT
     p.id prodId,
@@ -64,9 +68,9 @@ JOIN bangazonapi_orderproduct op ON opProdId = prodId
 -- get all the product line items
 
 SELECT
-o.id orderId,
-o.payment_type_id paymentId,
-op.product_id,
-op.order_id
+    o.id orderId,
+    o.payment_type_id paymentId,
+    op.product_id,
+    op.order_id
 FROM bangazonapi_order o
 LEFT JOIN bangazonapi_orderproduct op ON op.order_id = o.id
