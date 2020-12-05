@@ -52,15 +52,7 @@ class Product(SafeDeleteModel):
 
     @property
     def average_rating(self):
-        """Average rating calculated attribute for each product
-        for event in events:
-            event.joined = None
-
-            try:
-                EventGamers.objects.get(event=event, gamer=gamer)
-                event.joined = True
-            except EventGamers.DoesNotExist:
-                event.joined = False
+        """
         Returns:
             number -- The average rating for the product
         """
@@ -82,3 +74,11 @@ class Product(SafeDeleteModel):
     class Meta:
         verbose_name = ("product")
         verbose_name_plural = ("products")
+
+    @property
+    def liked(self):
+        """can_be_rated property, which will be calculated per user
+
+        Returns:
+            boolean -- If the user can rate the product or not
+        """
