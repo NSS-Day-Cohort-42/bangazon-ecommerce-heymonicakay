@@ -1,3 +1,4 @@
+"""module"""
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from safedelete.models import SafeDeleteModel
@@ -6,7 +7,7 @@ from .customer import Customer
 from .productcategory import ProductCategory
 from .orderproduct import OrderProduct
 from .productrating import ProductRating
-
+from .productlike import ProductLike
 
 class Product(SafeDeleteModel):
 
@@ -15,7 +16,7 @@ class Product(SafeDeleteModel):
     customer = models.ForeignKey(
         Customer, on_delete=models.DO_NOTHING, related_name='products')
     price = models.FloatField(
-        validators=[MinValueValidator(0.00), MaxValueValidator(10000.00)],)
+        validators=[MinValueValidator(0.00), MaxValueValidator(17500.00)],)
     description = models.CharField(max_length=255,)
     quantity = models.IntegerField(validators=[MinValueValidator(0)],)
     created_date = models.DateField(auto_now_add=True)
@@ -52,15 +53,7 @@ class Product(SafeDeleteModel):
 
     @property
     def average_rating(self):
-        """Average rating calculated attribute for each product
-        for event in events:
-            event.joined = None
-
-            try:
-                EventGamers.objects.get(event=event, gamer=gamer)
-                event.joined = True
-            except EventGamers.DoesNotExist:
-                event.joined = False
+        """
         Returns:
             number -- The average rating for the product
         """
@@ -82,3 +75,21 @@ class Product(SafeDeleteModel):
     class Meta:
         verbose_name = ("product")
         verbose_name_plural = ("products")
+
+    @property
+    def likes(self):
+        likes = ProductLike.objects.filter(product=self)
+        total = len(likes)
+        return total
+
+    @property
+    def liked(self):
+        """liked property, which will be calculated per user
+        Returns:
+            boolean -- If the user liked the product or not
+        """
+        return self.__liked
+
+    @liked.setter
+    def liked(self, value):
+        self.__liked = value

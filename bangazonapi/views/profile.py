@@ -61,7 +61,7 @@ class Profile(ViewSet):
             }
         """
         try:
-            current_user = Customer.objects.get(user__id=4)
+            current_user = Customer.objects.get(user=request.auth.user)
             serializer = ProfileSerializer(current_user, many=False, context={'request': request})
             return Response(serializer.data)
         except Exception as ex:
@@ -152,12 +152,10 @@ class Profile(ViewSet):
             try:
                 open_order = Order.objects.get(customer=current_user, payment_type=None)
                 line_items = OrderProduct.objects.filter(order=open_order)
-                line_items = LineItemSerializer(line_items, many=True, context={'request': request})
 
                 cart = {}
                 cart["order"] = OrderSerializer(open_order, many=False, context={'request': request}).data
-                cart["order"]["line_items"] = line_items.data
-                cart["order"]["size"] = len(line_items.data)
+                cart["order"]["size"] = len(line_items)
 
 
             except Order.DoesNotExist as ex:
