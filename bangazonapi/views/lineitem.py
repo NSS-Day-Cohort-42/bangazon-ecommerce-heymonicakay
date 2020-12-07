@@ -76,7 +76,9 @@ class LineItems(ViewSet):
         """
         try:
             customer = Customer.objects.get(user=request.auth.user)
-            order_product = OrderProduct.objects.get(pk=pk, order__customer=customer)
+            open_order = Order.objects.get(customer=customer, payment_type=None)
+            order_product = OrderProduct.objects.get(pk=pk, order__customer=customer, order=open_order)
+            order_product.delete()
 
             return Response({}, status=status.HTTP_204_NO_CONTENT)
 
