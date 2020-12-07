@@ -74,3 +74,7 @@ SELECT
     op.order_id
 FROM bangazonapi_order o
 LEFT JOIN bangazonapi_orderproduct op ON op.order_id = o.id
+
+SELECT
+    *
+FROM bangazonapi_productlike

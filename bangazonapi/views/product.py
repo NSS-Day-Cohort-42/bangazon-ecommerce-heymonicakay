@@ -6,7 +6,8 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import serializers
 from rest_framework import status
-from bangazonapi.models import Product, Customer, ProductCategory
+from rest_framework.decorators import action
+from bangazonapi.models import Product, Customer, ProductCategory, ProductLike
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.parsers import MultiPartParser, FormParser
 
@@ -15,9 +16,22 @@ class ProductSerializer(serializers.ModelSerializer):
     """JSON serializer for products"""
     class Meta:
         model = Product
-        fields = ('id', 'name', 'price', 'number_sold', 'description', 'quantity', 'created_date', 'location', 'image_path', 'average_rating', 'can_be_rated', )
+        fields = ('id', 'name', 'price', 'number_sold', 'description', 'quantity', 'created_date', 'location', 'image_path', 'average_rating', 'can_be_rated', 'likes' )
         depth = 1
 
+class ProductLikeSerializer(serializers.ModelSerializer):
+    """JSON serializer for products"""
+    class Meta:
+        model = ProductLike
+        fields = ('id', 'product', 'customer', )
+        depth = 1
+
+class LikedProductSerializer(serializers.ModelSerializer):
+    """JSON serializer for products"""
+    class Meta:
+        model = ProductLike
+        fields = ('id', 'product', 'customer',)
+        depth = 1
 
 class Products(ViewSet):
     """Request handlers for Products in the Bangazon Platform"""
@@ -55,7 +69,7 @@ class Products(ViewSet):
         @apiSuccess (200) {String} product.description Long form description of product
         @apiSuccess (200) {Number} product.price Cost of product
         @apiSuccess (200) {Number} product.quantity Number of items to sell
-        @apiSuccess (200) {Date} product.created_date City where product is located
+        @apiSuccess (200) {Date} product.created_date
         @apiSuccess (200) {String} product.location City where product is located
         @apiSuccess (200) {String} product.image_path Path to product image
         @apiSuccess (200) {Number} product.average_rating Average customer rating of product
@@ -251,11 +265,9 @@ class Products(ViewSet):
 
         if order is not None:
             order_filter = order
-
             if direction is not None:
                 if direction == "desc":
                     order_filter = f'-{order}'
-
             products = products.order_by(order_filter)
 
         elif category is not None:
@@ -312,3 +324,59 @@ class Products(ViewSet):
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+    @action(methods=['post', 'get', 'delete'], detail=True)
+    def like(self, request, pk=None):
+        """Managing users liking products"""
+        if request.method == "POST":
+            customer = Customer.objects.get(user=request.auth.user)
+            product = Product.objects.get(pk=pk)
+
+            try:
+                ProductLike.objects.get(customer=customer, product=product)
+
+                return Response(
+                    status=status.HTTP_422_UNPROCESSABLE_ENTITY
+                )
+            except ProductLike.DoesNotExist:
+                new_like = ProductLike()
+                new_like.customer = customer
+                new_like.product = product
+
+                new_like.save()
+
+                serializer = ProductLikeSerializer(new_like, context ={'request': request})
+
+                return Response(
+                    serializer.data,
+                    status=status.HTTP_201_CREATED
+                )
+        elif request.method == "DELETE":
+            customer = Customer.objects.get(user=request.auth.user)
+            product = Product.objects.get(pk=pk)
+            try:
+                like = ProductLike.objects.get(customer=customer, product=product)
+                like.delete()
+                return Response(
+                    {},
+                    status=status.HTTP_204_NO_CONTENT
+                )
+            except ProductLike.DoesNotExist:
+                return Response(
+                    {'message': 'Not currently liking this product'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+    @action(methods=['get'], detail=False)
+    def liked(self, request):
+        """Managing users liking products"""
+
+        customer = Customer.objects.get(user=request.auth.user)
+        liked = ProductLike.objects.all()
+
+        serializer = LikedProductSerializer(liked, many=True, context ={'request': request})
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+

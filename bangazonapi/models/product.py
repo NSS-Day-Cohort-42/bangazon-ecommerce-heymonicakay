@@ -1,3 +1,4 @@
+"""module"""
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from safedelete.models import SafeDeleteModel
@@ -6,7 +7,7 @@ from .customer import Customer
 from .productcategory import ProductCategory
 from .orderproduct import OrderProduct
 from .productrating import ProductRating
-
+from .productlike import ProductLike
 
 class Product(SafeDeleteModel):
 
@@ -76,9 +77,19 @@ class Product(SafeDeleteModel):
         verbose_name_plural = ("products")
 
     @property
-    def liked(self):
-        """can_be_rated property, which will be calculated per user
+    def likes(self):
+        product_likes = ProductLike.objects.filter(product=self)
+        total = len(product_likes)
+        return total
 
+    @property
+    def liked(self):
+        """liked property, which will be calculated per user
         Returns:
-            boolean -- If the user can rate the product or not
+            boolean -- If the user liked the product or not
         """
+        return self.__liked
+
+    @liked.setter
+    def liked(self, value):
+        self.__liked = value
