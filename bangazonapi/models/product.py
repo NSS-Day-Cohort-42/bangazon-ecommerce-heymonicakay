@@ -53,17 +53,31 @@ class Product(SafeDeleteModel):
     @property
     def average_rating(self):
         """Average rating calculated attribute for each product
+        for event in events:
+            event.joined = None
 
+            try:
+                EventGamers.objects.get(event=event, gamer=gamer)
+                event.joined = True
+            except EventGamers.DoesNotExist:
+                event.joined = False
         Returns:
             number -- The average rating for the product
         """
-        ratings = ProductRating.objects.filter(product=self)
-        total_rating = 0
-        for rating in ratings:
-            total_rating += rating.rating
+        try:
+            prod_ratings = ProductRating.objects.filter(
+                product=self)
+            total_prod_ratings = 0
 
-        avg = total_rating / len(ratings)
-        return avg
+            for prod_rating in prod_ratings:
+                total_prod_ratings += prod_rating.rating
+                return total_prod_ratings
+            if total_prod_ratings > 0:
+                avg_rating = total_prod_ratings / len(prod_ratings)
+                return avg_rating
+        except ProductRating.DoesNotExist:
+            avg = null
+            return avg
 
     class Meta:
         verbose_name = ("product")

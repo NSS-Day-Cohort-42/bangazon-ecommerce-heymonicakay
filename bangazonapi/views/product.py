@@ -15,9 +15,7 @@ class ProductSerializer(serializers.ModelSerializer):
     """JSON serializer for products"""
     class Meta:
         model = Product
-        fields = ('id', 'name', 'price', 'number_sold', 'description',
-                  'quantity', 'created_date', 'location', 'image_path',
-                  'average_rating', 'can_be_rated', )
+        fields = ('id', 'name', 'price', 'number_sold', 'description', 'quantity', 'created_date', 'location', 'image_path', 'average_rating', 'can_be_rated', )
         depth = 1
 
 
@@ -258,13 +256,13 @@ class Products(ViewSet):
 
             products = products.order_by(order_filter)
 
-        if category is not None:
+        elif category is not None:
             products = products.filter(category__id=category)
 
-        if quantity is not None:
+        elif quantity is not None:
             products = products.order_by("-created_date")[:int(quantity)]
 
-        if number_sold is not None:
+        elif number_sold is not None:
             def sold_filter(product):
                 if product.number_sold <= int(number_sold):
                     return True
@@ -274,4 +272,8 @@ class Products(ViewSet):
 
         serializer = ProductSerializer(
             products, many=True, context={'request': request})
-        return Response(serializer.data)
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )

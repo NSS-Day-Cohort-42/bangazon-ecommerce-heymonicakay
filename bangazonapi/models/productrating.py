@@ -5,9 +5,11 @@ from .customer import Customer
 
 class ProductRating(models.Model):
 
-    product = models.ForeignKey("Product", on_delete=models.CASCADE, related_name="ratings")
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    rating = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
+    product = models.ForeignKey(
+        "Product", on_delete=models.CASCADE, related_name="ratings")
+    customer = models.ForeignKey(
+        Customer, on_delete=models.CASCADE, related_name="products_rated")
+    rating = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)], null=True)
 
 class Meta:
     verbose_name = ("productrating")
