@@ -78,8 +78,8 @@ class Product(SafeDeleteModel):
 
     @property
     def likes(self):
-        product_likes = ProductLike.objects.filter(product=self)
-        total = len(product_likes)
+        likes = ProductLike.objects.filter(product=self)
+        total = len(likes)
         return total
 
     @property

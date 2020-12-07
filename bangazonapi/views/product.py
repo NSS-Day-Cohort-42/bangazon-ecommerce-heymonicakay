@@ -28,9 +28,10 @@ class ProductLikeSerializer(serializers.ModelSerializer):
 
 class LikedProductSerializer(serializers.ModelSerializer):
     """JSON serializer for products"""
+
     class Meta:
-        model = ProductLike
-        fields = ('id', 'product', 'customer',)
+        model = Product
+        fields = ('id', 'name', 'description',)
         depth = 1
 
 class Products(ViewSet):
@@ -372,9 +373,12 @@ class Products(ViewSet):
         """Managing users liking products"""
 
         customer = Customer.objects.get(user=request.auth.user)
-        liked = ProductLike.objects.all()
+        products = Product.objects.all()
+
+        liked = products.filter(product_likes__customer=customer)
 
         serializer = LikedProductSerializer(liked, many=True, context ={'request': request})
+        
         return Response(
             serializer.data,
             status=status.HTTP_200_OK
