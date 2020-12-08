@@ -392,10 +392,8 @@ class Products(ViewSet):
                 rating.product = product
                 rating.customer = customer
                 rating.save()
-                serializer = ProductLikeSerializer(new_like, context ={'request': request})
                 return Response(
-                    serializer.data,
-                    status=status.HTTP_201_CREATED
+                    status=status.HTTP_204_NO_CONTENT
                 )
         else:
             return Response(

@@ -60,11 +60,11 @@ class Product(SafeDeleteModel):
         try:
             prod_ratings = ProductRating.objects.filter(
                 product=self)
+
             total_prod_ratings = 0
 
             for prod_rating in prod_ratings:
                 total_prod_ratings += prod_rating.rating
-                return total_prod_ratings
             if total_prod_ratings > 0:
                 avg_rating = total_prod_ratings / len(prod_ratings)
                 return avg_rating
