@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework import serializers
 from rest_framework import status
 from rest_framework.decorators import action
-from bangazonapi.models import Product, Customer, ProductCategory, ProductLike
+from bangazonapi.models import Product, Customer, ProductCategory, ProductLike, ProductRating
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.parsers import MultiPartParser, FormParser
 
@@ -375,6 +375,32 @@ class Products(ViewSet):
                     {'message': 'Not currently liking this product'},
                     status=status.HTTP_404_NOT_FOUND
                 )
+    @action(methods=['post'], detail=True)
+    def rate(self, request, pk=None):
+        """Managing users rating products"""
+        customer = Customer.objects.get(user=request.auth.user)
+        product = Product.objects.get(pk=pk)
+        if customer != product.customer:
+            try:
+                ProductRating.objects.get(customer=customer, product=product)
+                return Response(
+                    status=status.HTTP_422_UNPROCESSABLE_ENTITY
+                )
+            except ProductRating.DoesNotExist:
+                rating = ProductRating()
+                rating.rating = request.data['rating']
+                rating.product = product
+                rating.customer = customer
+                rating.save()
+                serializer = ProductLikeSerializer(new_like, context ={'request': request})
+                return Response(
+                    serializer.data,
+                    status=status.HTTP_201_CREATED
+                )
+        else:
+            return Response(
+            status=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
 
     @action(methods=['get'], detail=False)
     def liked(self, request):
@@ -391,4 +417,3 @@ class Products(ViewSet):
             serializer.data,
             status=status.HTTP_200_OK
         )
-
