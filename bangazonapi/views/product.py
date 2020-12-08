@@ -255,6 +255,14 @@ class Products(ViewSet):
         """
         products = Product.objects.all()
 
+        for product in products:
+            customer = Customer.objects.get(user=request.auth.user)
+            product.can_be_rated = None
+            if product.customer != customer:
+                product.can_be_rated = True
+            else:
+                product.can_be_rated = False
+
         # Support filtering by category and/or quantity
         category = self.request.query_params.get('category', None)
         quantity = self.request.query_params.get('quantity', None)
@@ -378,7 +386,7 @@ class Products(ViewSet):
         liked = products.filter(product_likes__customer=customer)
 
         serializer = LikedProductSerializer(liked, many=True, context ={'request': request})
-        
+
         return Response(
             serializer.data,
             status=status.HTTP_200_OK
